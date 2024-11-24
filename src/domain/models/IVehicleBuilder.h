@@ -15,6 +15,12 @@ class IVehicleBuilder {
         virtual void honk(std::string sound) = 0;
         virtual void display() const = 0;
         virtual ~IVehicleBuilder() {}
+        virtual int getSeatCount() const = 0;
+        virtual int getWheelCount() const = 0;
+        virtual int getMaxSpeed() const = 0;
+        virtual std::string getName() const = 0;
+        virtual std::string getEngineType() const = 0;
+        virtual std::string getHonkSound() const = 0;
 };
 
 #endif

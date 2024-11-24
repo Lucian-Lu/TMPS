@@ -46,75 +46,35 @@ private:
 };
 
 // Class that creates snapshots using stacks
-class VehicleOriginator : public IVehicleBuilder {
+class VehicleOriginator {
 public:
-    VehicleOriginator() : seats(0), wheels(0), maxSpeed(0) {}
-
-    void reset() override {
-        seats = 0;
-        wheels = 0;
-        maxSpeed = 0;
-        name = "";
-        engineType = "";
-        honkSound = "";
-    }
-
-    void setSeatCount(int vehicleSeats) override {
-        seats = vehicleSeats;
-    }
-
-    void setWheelCount(int vehicleWheels) override {
-        wheels = vehicleWheels;
-    }
-
-    void setMaxSpeed(int vehicleMaxSpeed) override {
-        maxSpeed = vehicleMaxSpeed;
-    }
-
-    void setName(std::string vehicleName) override {
-        name = vehicleName;
-    }
-
-    void setEngineType(std::string vehicleEngineType) override {
-        engineType = vehicleEngineType;
-    }
-
-    void honk(std::string vehicleHonkSound) override {
-        honkSound = vehicleHonkSound;
-    }
-
-    void display() const override {
-        std::cout << "Name: " << name << ", Engine: " << engineType
-                  << ", Seats: " << seats << ", Wheels: " << wheels
-                  << ", Max Speed: " << maxSpeed << ", Honk: " << honkSound << std::endl;
-    }
+    VehicleOriginator(IVehicleBuilder* builder) : builder(builder) {}
 
     void makeSnapshot() {
-        snapshots.push(VehicleSnapshot(seats, wheels, maxSpeed, name, engineType, honkSound));
+        VehicleSnapshot snapshot(builder->getSeatCount(), builder->getWheelCount(), 
+                                  builder->getMaxSpeed(), builder->getName(), 
+                                  builder->getEngineType(), builder->getHonkSound());
+        snapshots.push(snapshot);
     }
 
     void undo() {
         if (!snapshots.empty()) {
-            VehicleSnapshot snapshot = snapshots.top(); // Get the snapshot
-            seats = snapshot.getSeats();
-            wheels = snapshot.getWheels();
-            maxSpeed = snapshot.getMaxSpeed();
-            name = snapshot.getName();
-            engineType = snapshot.getEngineType();
-            honkSound = snapshot.getHonkSound();
+            VehicleSnapshot snapshot = snapshots.top();
             snapshots.pop();
+
+            builder->setSeatCount(snapshot.getSeats());
+            builder->setWheelCount(snapshot.getWheels());
+            builder->setMaxSpeed(snapshot.getMaxSpeed());
+            builder->setName(snapshot.getName());
+            builder->setEngineType(snapshot.getEngineType());
+            builder->honk(snapshot.getHonkSound());
         } else {
             std::cout << "No snapshots saved in memory." << std::endl;
         }
     }
 
 private:
-    int seats;
-    int wheels;
-    int maxSpeed;
-    std::string name;
-    std::string engineType;
-    std::string honkSound;
+    IVehicleBuilder* builder;
     std::stack<VehicleSnapshot> snapshots;
 };
 

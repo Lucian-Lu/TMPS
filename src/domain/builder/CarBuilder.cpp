@@ -1,6 +1,5 @@
 #include "CarBuilder.h"
 
-
 CarBuilder::CarBuilder() {
     reset();
 }
@@ -36,7 +35,7 @@ void CarBuilder::setEngineType(std::string engine) {
 
 void CarBuilder::honk(std::string sound) {
     this->sound = sound;
-    std::cout << "The car goes " << this->sound << std::endl; 
+    std::cout << "The car goes " << this->sound << std::endl;
 }
 
 void CarBuilder::display() const {
@@ -44,3 +43,28 @@ void CarBuilder::display() const {
               << ", Wheels: " << wheelCount << ", Max Speed: " << maxSpeed
               << ", Engine: " << engineName << std::endl;
 }
+
+int CarBuilder::getSeatCount() const {
+    return seatCount;
+}
+
+int CarBuilder::getWheelCount() const {
+    return wheelCount;
+}
+
+int CarBuilder::getMaxSpeed() const {
+    return maxSpeed;
+}
+
+std::string CarBuilder::getName() const {
+    return modelName;
+}
+
+std::string CarBuilder::getEngineType() const {
+    return engineName;
+}
+
+std::string CarBuilder::getHonkSound() const {
+    return sound;
+}
+

@@ -35,7 +35,7 @@ void TruckBuilder::setEngineType(std::string engine) {
 
 void TruckBuilder::honk(std::string sound) {
     this->sound = sound;
-    std::cout << "The truck goes " << this->sound << std::endl; 
+    std::cout << "The truck goes " << this->sound << std::endl;
 }
 
 void TruckBuilder::display() const {
@@ -43,3 +43,28 @@ void TruckBuilder::display() const {
               << ", Wheels: " << wheelCount << ", Max Speed: " << maxSpeed
               << ", Engine: " << engineName << std::endl;
 }
+
+int TruckBuilder::getSeatCount() const {
+    return seatCount;
+}
+
+int TruckBuilder::getWheelCount() const {
+    return wheelCount;
+}
+
+int TruckBuilder::getMaxSpeed() const {
+    return maxSpeed;
+}
+
+std::string TruckBuilder::getName() const {
+    return modelName;
+}
+
+std::string TruckBuilder::getEngineType() const {
+    return engineName;
+}
+
+std::string TruckBuilder::getHonkSound() const {
+    return sound;
+}
+

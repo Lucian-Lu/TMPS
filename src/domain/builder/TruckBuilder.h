@@ -24,6 +24,12 @@ public:
     void setEngineType(std::string engine) override;
     void honk(std::string sound) override;
     void display() const;
+    int getSeatCount() const;
+    int getWheelCount() const;
+    int getMaxSpeed() const;
+    std::string getName() const;
+    std::string getEngineType() const;
+    std::string getHonkSound() const;
 };
 
 #endif

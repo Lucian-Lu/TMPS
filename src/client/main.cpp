@@ -1,45 +1,55 @@
 #include <iostream>
 #include "../domain/models/IVehicleBuilder.h"
+#include "../domain/builder/CarBuilder.h"
+#include "../domain/builder/TruckBuilder.h"
 #include "../utilities/memento/VehicleSnapshot.h"
 #include "../utilities/memento/VehicleCaretaker.h"
 
 int main() {
-    // Making a vehicle and caretaker objects
-    VehicleOriginator vehicle;
+    // Creating a car builder 
+    CarBuilder carBuilder;
+    // Assigning the car builder to the originator & making a caretaker
+    VehicleOriginator vehicle(&carBuilder);
     VehicleCaretaker caretaker;
 
-    vehicle.setName("Car 1");
-    vehicle.setEngineType("Engine V1");
-    vehicle.setSeatCount(4);
-    vehicle.setWheelCount(4);
-    vehicle.setMaxSpeed(150);
-    vehicle.honk("Beep");
-    vehicle.display();
+    // Setting the initial vehicle details
+    carBuilder.setName("Car 1");
+    carBuilder.setEngineType("Engine V1");
+    carBuilder.setSeatCount(4);
+    carBuilder.setWheelCount(4);
+    carBuilder.setMaxSpeed(150);
+    carBuilder.honk("Beep");
+    carBuilder.display();
 
     // Making a snapshot of the initial vehicle
     vehicle.makeSnapshot();
 
-    vehicle.setName("Car 2");
-    vehicle.setEngineType("Engine V2");
-    vehicle.setMaxSpeed(180);
-    vehicle.honk("Beep Beep");
-    vehicle.display();
+    // Modifying the vehicle
+    carBuilder.setName("Car 2");
+    carBuilder.setEngineType("Engine V2");
+    carBuilder.setMaxSpeed(180);
+    carBuilder.honk("Beep Beep");
+    carBuilder.display();
+    
     // Making a snapshot of the modified vehicle
     vehicle.makeSnapshot();
 
-    vehicle.setName("Car 3");
-    vehicle.setEngineType("Engine V3");
-    vehicle.setMaxSpeed(210);
-    vehicle.honk("Beep Beep Beep");
-    vehicle.display();
+    // Modifying the modified the vehicle
+    carBuilder.setName("Car 3");
+    carBuilder.setEngineType("Engine V3");
+    carBuilder.setMaxSpeed(210);
+    carBuilder.honk("Beep Beep Beep");
+    carBuilder.display();
+    
     // Reverting to the modified vehicle
     vehicle.undo();
-    std::cout << "After first undo:" << std::endl;
-    vehicle.display();
+    std::cout << "After first undo (Modified car):" << std::endl;
+    carBuilder.display();
+
     // Reverting to the initial vehicle
     vehicle.undo();
-    std::cout << "After second undo:" << std::endl;
-    vehicle.display();
+    std::cout << "After second undo (Initial car):" << std::endl;
+    carBuilder.display();
 
     return 0;
 }
