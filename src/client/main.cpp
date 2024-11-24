@@ -1,51 +1,45 @@
 #include <iostream>
 #include "../domain/models/IVehicleBuilder.h"
-#include "../domain/builder/CarBuilder.h"
-#include "../domain/builder/TruckBuilder.h"
-#include "../utilities/composite/VehicleComposite.h"
-#include "../utilities/decorator/VehicleColorDecorator.h"
-#include "../utilities/facade/VehicleMaintenance.h"
+#include "../utilities/memento/VehicleSnapshot.h"
+#include "../utilities/memento/VehicleCaretaker.h"
 
 int main() {
-    CarBuilder carBuilder;
-    TruckBuilder truckBuilder;
+    // Making a vehicle and caretaker objects
+    VehicleOriginator vehicle;
+    VehicleCaretaker caretaker;
 
-    // Using the color decorator on a car & truck
-    std::string color1 = "Yellow";
-    VehicleColorDecorator car(&carBuilder, color1);
-    car.setName("Cool car");
-    car.setSeatCount(4);
-    car.setWheelCount(4);
-    car.setMaxSpeed(210);
-    car.setEngineType("V8");
-    car.honk("Womp");
-    car.display();
+    vehicle.setName("Car 1");
+    vehicle.setEngineType("Engine V1");
+    vehicle.setSeatCount(4);
+    vehicle.setWheelCount(4);
+    vehicle.setMaxSpeed(150);
+    vehicle.honk("Beep");
+    vehicle.display();
 
-    std::string color2 = "Blue";
-    VehicleColorDecorator truck(&truckBuilder, color2);
-    truck.setName("Heavy Duty Truck");
-    truck.setSeatCount(2);
-    truck.setWheelCount(12);
-    truck.setMaxSpeed(140);
-    truck.setEngineType("Diesel");
-    truck.honk("HooOOnk");
-    truck.display();
+    // Making a snapshot of the initial vehicle
+    vehicle.makeSnapshot();
 
-    // Making a composite of the vehicles
-    VehicleComposite fleet;
-    fleet.addVehicle(&car);
-    fleet.addVehicle(&truck);
+    vehicle.setName("Car 2");
+    vehicle.setEngineType("Engine V2");
+    vehicle.setMaxSpeed(180);
+    vehicle.honk("Beep Beep");
+    vehicle.display();
+    // Making a snapshot of the modified vehicle
+    vehicle.makeSnapshot();
 
-    std::cout << "Displaying vehicles:" << std::endl;
-    fleet.display();
-
-    // Using the facade for easy changes to the objects
-    VehicleMaintenance mechanic(truckBuilder, carBuilder);
-    mechanic.upgradeCar();
-    mechanic.upgradeTruck();
-
-    std::cout << "Displaying upgraded vehicles:" << std::endl;
-    fleet.display();
+    vehicle.setName("Car 3");
+    vehicle.setEngineType("Engine V3");
+    vehicle.setMaxSpeed(210);
+    vehicle.honk("Beep Beep Beep");
+    vehicle.display();
+    // Reverting to the modified vehicle
+    vehicle.undo();
+    std::cout << "After first undo:" << std::endl;
+    vehicle.display();
+    // Reverting to the initial vehicle
+    vehicle.undo();
+    std::cout << "After second undo:" << std::endl;
+    vehicle.display();
 
     return 0;
 }
