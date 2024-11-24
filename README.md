@@ -1,81 +1,114 @@
-# TMPS Laboratory Work #2 - Structural Design Patterns
+# TMPS Laboratory Work #3 - Behavioral Design Patterns
 
 ## Author - Lupan Lucian, FAF-221
 
 # Objectives:
-* Learn about Structural Design Patterns and their uses;
-* Implement the patterns in a simple project;
-* Make use of the previous lab files by extending it with the new design patterns.
+* Learn about Behavioral Design Patterns;
+* Implement a behavioral pattern in a project;
+* Extend on the previous laboratory with the new design pattern.
 
-# Introduction to Structual Design Patterns
-Structural Design Patterns are solutions in software design that focus on how classes and objects are organized to form larger, functional structures. These patterns help developers simplify relationships between objects, making code more efficient, flexible, and easy to maintain. By using structural patterns, you can better manage complex class hierarchies, reuse existing code, and create scalable architectures.
-
-# What are the benefits of Structural Design Patterns?
-1. This pattern is particularly useful for making independently developed class libraries work together.
-2. Structural Design Patterns describe ways to compose objects to realize new functionality.
-3. The added flexibility of object composition comes from the ability to change the composition at run-time, which is impossible with static class composition.
+# Introduction to Behavioral Design Patterns
+Behavioral design patterns are a category of design patterns that focus on the interactions and communication between objects. They help define how objects collaborate and distribute responsibility among them, making it easier to manage complex control flow and communication in a system. 
 
 # Used Design Patterns
-1. Composite
-2. Decorator
-3. Facade
+1. Memento
 
+# What is the 'Memento' Design Pattern?
+A Memento Pattern says that "to restore the state of an object to its previous state". But it must do this without violating Encapsulation. Such case is useful in case of error or failure. The Memento pattern is also known as Token. Undo or backspace or ctrl+z is one of the most used operation in an editor. Memento design pattern is used to implement the undo operation. This is done by saving the current state of the object as it changes state.
 
+## Benefits:
+1.  It preserves encapsulation boundaries.
+2.  It simplifies the originator.
+
+## Usage:
+1.  It is used in Undo and Redo operations in most software.
+2.  It is also used in database transactions.
 
 # Implementation:
-This laboratory work expands on the previous laboratory work. Since structural design patterns manipulate existing data structure (in our case - Car & Truck Builder/Factory), we can implement the design patterns without altering the already existing code from Lab1.
-1. **Composite** - Composite pattern is used where we need to treat a group of objects in similar way as a single object. It's implemented by adding a vector list which can be used to store other instances of a Builder (car/truck):
+This laboratory work expands on the previous laboratory work. In order to implement memento, previously defined classes had to be redefined in order to be able to handle the functionality of saving a snapshot. To achieve this, the base class - **IVehicleBuilder**, had to be modified with getter methods (for use in the car/truck builders):
 ```
-void addVehicle(IVehicleBuilder* vehicle) {
-        vehicles.push_back(vehicle);
-    }
+virtual int getSeatCount() const = 0;
+virtual int getWheelCount() const = 0;
+virtual int getMaxSpeed() const = 0;
+virtual std::string getName() const = 0;
+virtual std::string getEngineType() const = 0;
+virtual std::string getHonkSound() const = 0;
+```
 
-    void removeVehicle(IVehicleBuilder* vehicle) {
-        for (auto it = vehicles.begin(); it != vehicles.end(); ++it) {
-            if (*it == vehicle) {
-                vehicles.erase(it);
-                break;
-            }
-        }
-    }
+These are simple getter methods which are required in order to get the data needed for making a memento/snapshot of a vehicle. Since **IVehicleBuilder** is the main interface, **CarBuilder** and **TruckBuilder** also had to be modified to include & implement those methods:
 ```
-This approach allows us to, for example, store vehicle objects with similar behaviour in another object, and make use of all of them at once.
-\
-2. **Decorator** - Decorator pattern allows a user to add new functionality to an existing object without altering its structure. In this context, the decorator basically allows us to store an additional field, not included in the vehicle builder class - color:
-```
-// Setting the color in a constructor
-VehicleColorDecorator(IVehicleBuilder* vehicleBuilder, std::string& vehicleColor)
-        : builder(vehicleBuilder), color(vehicleColor) {}
+int CarBuilder::getSeatCount() const {
+    return seatCount;
+}
 
-// Printing the color
-void display() const override {
-        builder->display();
-        std::cout << "Color: " << color << std::endl;
-    }
-```
-By using the decorator, we can change existing car/truck objects without having to modify the base classes (i.e., IVehicleBuilder).
-\
-3. **Facade** - Facade pattern hides the complexities of the system and provides an interface to the client using which the client can access the system. To implement this design pattern, we simply modify some of the parameters of our objects, while providing an abstract/vague explanation to the user (upgradeCar/Truck):
-```
-public:
-    VehicleMaintenance(TruckBuilder& truckBuilder, CarBuilder& carBuilder)
-        : truck(truckBuilder), car(carBuilder) {}
+int CarBuilder::getWheelCount() const {
+    return wheelCount;
+}
 
-    void upgradeCar() {
-        car.setEngineType("Car Engine V2");
-        car.setMaxSpeed(250);
-    }
+int CarBuilder::getMaxSpeed() const {
+    return maxSpeed;
+}
 
-    void upgradeTruck() {
-        truck.setEngineType("Truck Engine V2");
-        truck.setMaxSpeed(150);
-    }
+std::string CarBuilder::getName() const {
+    return modelName;
+}
 
-private:
-    TruckBuilder& truck;
-    CarBuilder& car;
+std::string CarBuilder::getEngineType() const {
+    return engineName;
+}
+
+std::string CarBuilder::getHonkSound() const {
+    return sound;
+}
 ```
-The abstraction of this design pattern lets the client use methods without having to worry about their implementation.
+
+After modifying the base classes, the additional functionality for saving/undoing a snapshot could be implemeneted in a separate header file - **VehicleSnapshot**, which in order to save a snapshot, would use the IVehicleBuilder object as a parameter and scrape all the data from it, pushing it into a stack (in the **VehicleOriginator** class):
+```
+VehicleOriginator(IVehicleBuilder* builder) : builder(builder) {}
+
+void makeSnapshot() {
+    VehicleSnapshot snapshot(builder->getSeatCount(), builder->getWheelCount(), 
+                                builder->getMaxSpeed(), builder->getName(), 
+                                builder->getEngineType(), builder->getHonkSound());
+    snapshots.push(snapshot);
+}
+```
+
+The **VehicleSnapshot** class is used as a template for storing/retrieving objects into/from the stack. When the user calls undo(), the top object is loaded into the VehicleSnapshot class, thus effectively getting the previous state of the object:
+```
+void undo() {
+    if (!snapshots.empty()) {
+        VehicleSnapshot snapshot = snapshots.top();
+        snapshots.pop();
+
+        builder->setSeatCount(snapshot.getSeats());
+        builder->setWheelCount(snapshot.getWheels());
+        builder->setMaxSpeed(snapshot.getMaxSpeed());
+        builder->setName(snapshot.getName());
+        builder->setEngineType(snapshot.getEngineType());
+        builder->honk(snapshot.getHonkSound());
+    } else {
+        std::cout << "No snapshots saved in memory." << std::endl;
+    }
+}
+```
+
+Lastly, we implement a **VehicleCaretaker** class, which manages the snapshots, but is unable to modify the data inside of them. It modifies the data by using the methods inside of the **VehicleSnapshot** class (undo() & makeSnapshot()):
+```
+void makeSnapshot(const VehicleSnapshot& snapshot) {
+    snapshots.push(snapshot);
+}
+
+VehicleSnapshot undo() {
+    if (!snapshots.empty()) {
+        VehicleSnapshot snapshot = snapshots.top();
+        snapshots.pop();
+        return snapshot;
+    } else {
+        std::cout << "No snapshots stored in memory." << std::endl;
+    }
+}
+```
 
 # Conclusion
-After finishing this laboratory work, I learnt about the various structural design patterns, and how they could be used in OOP projects. Compared to the creational design patterns, the structural design patterns's role is to modify the existing objects, either by adding new functionalities, allowing incompatible objects to operate, or optimizing the current designs (i.e., reducing memory usage with the help of flyweight pattern).
+After finishing this laboratory work, I learnt about how behavioral design patterns could be implemented in projects that work with classes. Generally speaking, they simplify the communication process between classes, making them very useful in big projects that require the implementation of various algorithms operating on the same class - thus having common behaviors. This behavior can be stored in another class that the algorithms can share, simplifying and saving project resources.
